@@ -2,29 +2,40 @@ import React, { PureComponent } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
-import {createAppContainer} from 'react-navigation'
-import {createStackNavigator} from 'react-navigation-stack';
+import { Navigation } from 'react-native-navigation';
 
-const AppNavigator = createStackNavigator(
-  {
-      Main: MainScreen,
-      SearchRes: SearchResScreen
-  },
-  {
-      initialRouteName: "MainScreen",
-      defaultNavigationOptions: {
-          
-      },
-      headerMode: 'none',
-  }
+Navigation.registerComponent(`navigation.Main`, () => MainScreen);
+Navigation.registerComponent(`navigation.SearchRes`, () => SearchResScreen);
 
-);
-
-const AppContainer = createAppContainer(AppNavigator);
+Navigation.events().registerAppLaunchedListener(() => {
+  Navigation.setRoot({
+    root: {
+      stack: {
+        children: [{
+          component: {
+            name: "navigation.SearchRes",
+            passProps: {
+              book: null
+            }
+          },
+          component: {
+            name: "navigation.Main"
+          }
+        }],
+        options: {
+          topBar: {
+            visible: false
+          }
+        }
+      }
+    }
+  });
+});
 
 export default class MainScreen extends PureComponent {
   constructor(props) {
     super(props);
+    Navigation.events().bindComponent(this);
     this.state = {
     detectedTexts: null
     };
