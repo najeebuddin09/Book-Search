@@ -13,12 +13,6 @@ Navigation.events().registerAppLaunchedListener(() => {
       stack: {
         children: [{
           component: {
-            name: "navigation.SearchRes",
-            passProps: {
-              book: null
-            }
-          },
-          component: {
             name: "navigation.Main"
           }
         }],
@@ -73,16 +67,31 @@ export default class MainScreen extends PureComponent {
   }
 
   search = function(book) {
-    this.props.navigation.navigate('SearchResScreen', { booktosearch: book});
+    Navigation.push(this.props.componentId, {
+      component: {
+        name: 'navigation.SearchRes',
+        passProps: {
+          book: this.state.detectedTexts
+        }
+      }
+    });
   };
 
 }
 
 class SearchResScreen extends PureComponent {
+  constructor(props) {
+    super(props);
+    Navigation.events().bindComponent(this);
+    this.state = {
+
+    };
+}
+
   render(){
     return(
       <View>
-        <Text>here will be the search result.</Text>
+        <Text>{this.props.book}</Text>
       </View>
     );
   }
