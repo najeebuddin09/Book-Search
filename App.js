@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Image } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 import { Navigation } from 'react-native-navigation';
@@ -13,7 +13,7 @@ Navigation.events().registerAppLaunchedListener(() => {
       stack: {
         children: [{
           component: {
-            name: "navigation.Main"
+            name: "navigation.SearchRes"
           }
         }],
         options: {
@@ -84,17 +84,94 @@ class SearchResScreen extends PureComponent {
     super(props);
     Navigation.events().bindComponent(this);
     this.state = {
+      searchresult: null,
+      done: false
 
     };
 }
 
+componentDidMount(){
+  fetch('https://www.googleapis.com/books/v1/volumes?q=harrypotter') // + this.props.book
+  .then((response) => response.json())
+  .then((response) => {
+    console.log(response);
+    console.log(response.items[1].volumeInfo.title);
+    this.setState({
+      searchresult: response,
+      done: true
+    });
+    console.log("this is state inside : " + this.state.searchresult.items[1].volumeInfo.title);
+  }).catch((error) => {
+    console.error(error);
+  });
+}
+
+//<book title={this.state.searchresult.items[1].volumeInfo.title} />
   render(){
+    if (this.state.done){
+      return(
+        <ScrollView contentContainerStyle={styles.scrol}>
+          <Book 
+            title={this.state.searchresult.items[0].volumeInfo.title} 
+            imgurl={this.state.searchresult.items[0].volumeInfo.imageLinks.smallThumbnail}
+            author={this.state.searchresult.items[0].volumeInfo.authors}
+            publisher={this.state.searchresult.items[0].volumeInfo.publisher}
+            rating={this.state.searchresult.items[0].volumeInfo.averageRating}
+          />
+        </ScrollView>
+      );
+    }
+    else{
+      return null
+    }
+  }
+}
+
+class Book extends PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+
+    };
+  }
+
+  render(){
+
+    var authors = [];
+
+    for (let i = 0; i < this.props.author.length; i++) {
+      authors.push(
+        <Text key={i}>{this.props.author[i]}</Text>
+      );
+    }
+
     return(
-      <View>
-        <Text>{this.props.book}</Text>
+    <TouchableOpacity onPress={() => this.open()} style={styles.tile}>
+      <Text style={styles.title}>{this.props.title}</Text>
+      <Image
+        style={{width: 128, height: 194, alignSelf: "center", marginBottom: 10}}
+        source={{uri: this.props.imgurl}}
+      />
+      <View style={styles.tileBottom}>
+        <View>
+          <Text>Authors:</Text>
+          {authors}
+        </View>
+        <View>
+          <Text>Publisher: {this.props.publisher}</Text>
+        </View>
+        <View>
+          <Text>Average Ratings: {this.props.rating}</Text>
+        </View>
       </View>
+    </TouchableOpacity>
     );
   }
+
+  open = function(book) {
+    
+  }
+
 }
 
 const styles = StyleSheet.create({
@@ -117,4 +194,24 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     margin: 20,
   },
+  tile: {
+    backgroundColor: '#e0dcdb',
+    marginTop: 10,
+    padding: 20,
+    fontFamily: "Arial",
+    width: 350
+
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10
+  },
+  scrol : {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  tileBottom: {
+    marginLeft: 10
+  }
 });
