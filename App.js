@@ -13,7 +13,7 @@ Navigation.events().registerAppLaunchedListener(() => {
       stack: {
         children: [{
           component: {
-            name: "navigation.SearchRes"
+            name: "navigation.Main"
           }
         }],
         options: {
@@ -91,7 +91,7 @@ class SearchResScreen extends PureComponent {
 }
 
 componentDidMount(){
-  fetch('https://www.googleapis.com/books/v1/volumes?q=harrypotter&maxResults=20') // + this.props.book
+  fetch('https://www.googleapis.com/books/v1/volumes?q=' + this.props.book + '&maxResults=20') // + this.props.book
   .then((response) => response.json())
   .then((response) => {
     console.log(response);
