@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Image } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, Image, Linking } from 'react-native';
 import { RNCamera } from 'react-native-camera';
 
 import { Navigation } from 'react-native-navigation';
@@ -91,7 +91,7 @@ class SearchResScreen extends PureComponent {
 }
 
 componentDidMount(){
-  fetch('https://www.googleapis.com/books/v1/volumes?q=harrypotter') // + this.props.book
+  fetch('https://www.googleapis.com/books/v1/volumes?q=harrypotter&maxResults=20') // + this.props.book
   .then((response) => response.json())
   .then((response) => {
     console.log(response);
@@ -106,18 +106,37 @@ componentDidMount(){
   });
 }
 
-//<book title={this.state.searchresult.items[1].volumeInfo.title} />
   render(){
     if (this.state.done){
+      var list_books = [];
+
+      for (let i = 0; i < this.state.searchresult.items.length; i++) {
+        if (this.state.searchresult.items[i].volumeInfo != null 
+          && this.state.searchresult.items[i].volumeInfo.title != null 
+          && this.state.searchresult.items[i].volumeInfo.imageLinks != null 
+          && this.state.searchresult.items[i].volumeInfo.authors != null 
+          && this.state.searchresult.items[i].volumeInfo.publisher != null 
+          && this.state.searchresult.items[i].volumeInfo.averageRating != null 
+          && this.state.searchresult.items[i].volumeInfo.infoLink != null 
+        ){
+          list_books.push(
+            <View key={i}>
+              <Book
+                title={this.state.searchresult.items[i].volumeInfo.title} 
+                imgurl={this.state.searchresult.items[i].volumeInfo.imageLinks.smallThumbnail}
+                author={this.state.searchresult.items[i].volumeInfo.authors}
+                publisher={this.state.searchresult.items[i].volumeInfo.publisher}
+                rating={this.state.searchresult.items[i].volumeInfo.averageRating}
+                link={this.state.searchresult.items[i].volumeInfo.infoLink}
+              />
+            </View>
+          );
+        }
+      }
+
       return(
         <ScrollView contentContainerStyle={styles.scrol}>
-          <Book 
-            title={this.state.searchresult.items[0].volumeInfo.title} 
-            imgurl={this.state.searchresult.items[0].volumeInfo.imageLinks.smallThumbnail}
-            author={this.state.searchresult.items[0].volumeInfo.authors}
-            publisher={this.state.searchresult.items[0].volumeInfo.publisher}
-            rating={this.state.searchresult.items[0].volumeInfo.averageRating}
-          />
+          {list_books}
         </ScrollView>
       );
     }
@@ -146,7 +165,7 @@ class Book extends PureComponent {
     }
 
     return(
-    <TouchableOpacity onPress={() => this.open()} style={styles.tile}>
+    <TouchableOpacity onPress={() => this.open(this.props.link)} style={styles.tile}>
       <Text style={styles.title}>{this.props.title}</Text>
       <Image
         style={{width: 128, height: 194, alignSelf: "center", marginBottom: 10}}
@@ -169,7 +188,7 @@ class Book extends PureComponent {
   }
 
   open = function(book) {
-    
+    Linking.openURL(book);
   }
 
 }
